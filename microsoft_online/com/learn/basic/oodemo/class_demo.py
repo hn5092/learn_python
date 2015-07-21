@@ -4,7 +4,7 @@ Created on 2015年7月16日
 
 @author: Administrator
 '''
-# 类的初始化
+# 类的初始化   两个下划线的 是默认的
 # __init__初始化(私有函数)
 # from os.path import join
 # class FileObject:
