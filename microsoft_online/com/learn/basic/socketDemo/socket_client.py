@@ -5,10 +5,8 @@ Created on 2015年7月20日
 @author: Administrator
 '''
 import socket
-
-
-HOST = '192.168.80.1'
-PORT = 50007
+HOST = 'localhost'
+PORT = 9999
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.connect((HOST,PORT))
 while True:
