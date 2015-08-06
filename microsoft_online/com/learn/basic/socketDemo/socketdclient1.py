@@ -59,7 +59,7 @@ def send_data(raw_str):
         
 class WebSocket(threading.Thread):
     
-    GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+    GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
     
     def __init__(self,conn,index,name,remote, path="/"):
         threading.Thread.__init__(self)
@@ -80,7 +80,7 @@ class WebSocket(threading.Thread):
                 self.buffer += bytes.decode(self.conn.recv(1024))
 
                 if self.buffer.find('\r\n\r\n') != -1:
-                    header, data = self.buffer.split('\r\n\r\n', 1)
+                    header, data = self.buffer.split('\r\n\r\n', 1) 
                     for line in header.split("\r\n")[1:]:
                         key, value = line.split(": ", 1)
                         headers[key] = value
@@ -88,7 +88,7 @@ class WebSocket(threading.Thread):
                     headers["Location"] = ("ws://%s%s" %(headers["Host"], self.path))
                     key = headers['Sec-WebSocket-Key']
                     key = '%s'% (key)
-                    print str(hashlib.sha1(key+ self.GUID).digest())
+                    print(str(key))
                     #处理
                     token = b64encode(str(hashlib.sha1(key+ self.GUID).digest()))
 
@@ -96,7 +96,7 @@ class WebSocket(threading.Thread):
                     "Upgrade: websocket\r\n"\
                     "Connection: Upgrade\r\n"\
                     "Sec-WebSocket-Accept: "+bytes.decode(token)+"\r\n\r\n"
-                    
+                    print str(handshake)
                     self.conn.send(str(handshake))
                     self.handshaken = True  
                     print ('Socket %s Handshaken with %s success!' %(self.index, self.remote))  
@@ -128,7 +128,7 @@ class WebSocketServer(object):
     def begin(self):
         print( 'WebSocketServer Start!')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind(("127.0.0.1",12345))
+        self.socket.bind(("127.0.0.1",99))
         self.socket.listen(50)
          
         global connectionlist

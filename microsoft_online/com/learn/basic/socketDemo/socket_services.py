@@ -12,7 +12,6 @@ Created on 2015年7月20日
 '''
 import socket
 import threading
-import turtle
 
 def jonnyS(client, address):
     try:
@@ -33,8 +32,8 @@ def jonnyS(client, address):
     #关闭与客户端的连接
 
 
-HOST = '192.168.80.1'
-PORT = 50007
+HOST = 'localhost'
+PORT = 8888
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.bind((HOST,PORT))
 s.listen(10)

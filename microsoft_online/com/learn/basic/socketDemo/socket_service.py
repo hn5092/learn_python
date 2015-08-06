@@ -11,20 +11,18 @@ Created on 2015年7月20日
 @author: Administrator
 '''
 import socket
-
-
-
 HOST = 'localhost'
 PORT = 8888
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+print type(s)
 s.bind((HOST,PORT))
 s.listen(10)
+conn,addr=s.accept()
 while True:
-    conn,addr=s.accept()
+    print type(conn)
     print addr
     #接收数据的大小
-    while True:
-        buf = s.recv(2048)
+    buf = conn.recv(1024)
     #将接收到的信息原样的返回到客户端中
-        s.sendall('1')
-    s.close()
+    conn.sendall('1')
+conn.close()

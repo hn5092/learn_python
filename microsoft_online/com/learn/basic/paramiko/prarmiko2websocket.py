@@ -8,6 +8,12 @@ from base64 import b64encode
 import hashlib
 import socket
 import threading
+
+import paramiko
+
+from com.learn.basic.paramiko.ParamikoDemo2 import readacount, sshObj
+
+
 #这个方法用来解析收到的二进制字符串
 def parse_data(msg):
     if(len(msg)<1):
@@ -31,22 +37,7 @@ def parse_data(msg):
         raw_str += chr(ord(d) ^ ord(masks[i%4]))
         i += 1     
     return raw_str
-#这个方法用来发送消息  转换成为二进制
-def send_data(raw_str):
-    back_str = []
- 
-    back_str.append('\x81')
-    data_length = len(raw_str)
- 
-    if data_length < 125:
-        back_str.append(chr(data_length))
-    else:
-        back_str.append(chr(126))
-        back_str.append(chr(data_length >> 8))
-        back_str.append(chr(data_length & 0xFF))
- 
-    back_str = "".join(back_str) + raw_str
-    return back_str
+
 class WebSocket(threading.Thread):
     GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
     def __init__(self,conn,address,path="/"):
@@ -65,7 +56,6 @@ class WebSocket(threading.Thread):
             #判断是否已经握手
             if self.handshaken == False:
                 self.buffer += bytes.decode(self.conn.recv(1024))
-                
                 print self.buffer
                 if self.buffer.find('\r\n\r\n') != -1:
                     header, data = self.buffer.split('\r\n\r\n', 1) 
@@ -90,13 +80,18 @@ class WebSocket(threading.Thread):
                 while 1:
                     message = self.conn.recv(1024)
                     message = str(parse_data(message))
-                    print "this is message:%s." %(message)
-                    print not message == ""
+                    paramiko.util.log_to_file("paramiko.log")
                     global connlist
-                    #判断 的那个消息不是空的时候进行 遍历对象把每个客户端发送的消息发送给每个客户端 达到效果
-                    if not message == "undefined" or not message == "":
-                        for con in connlist:
-                            connlist[con].send(send_data("%s:%s"%(self.address,message)))
+                    for x in connlist:
+                        print connlist[x]
+                    #允许链接不在host里面的主机
+                    print "开始启动"
+                    for cmd in readacount():
+                        
+                        conn = sshObj(cmd,connlist)
+                        conn.start()
+                        print "%s已经启动"%(cmd.hostname)
+
 
 HOST = 'localhost'
 PORT = 99
