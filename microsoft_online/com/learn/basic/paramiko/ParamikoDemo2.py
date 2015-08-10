@@ -6,6 +6,7 @@ Created on Aug 5, 2015
 '''
 import threading
 import paramiko
+from time import sleep
 #这个方法用来发送消息  转换成为二进制
 def send_data(raw_str):
     back_str = []
@@ -22,13 +23,21 @@ def send_data(raw_str):
  
     back_str = "".join(back_str) + raw_str
     return back_str
+#读取账号记录
 class account():
     def __init__(self,info):
         info = info.split(" ")
         self.hostname = info[0]
         self.pwd = info[1]
         self.username = info[2]
-        
+def readacount ():
+    f = open("e:\\account.txt")
+    l = [ x for x in f.read().split('\n') if not x == ""]
+    accountlist = []
+    for info in l:
+        accountlist.append(account(info))
+    return accountlist
+#读取CPU信息       
 class cpuinfo():
     def __init__(self,hostname,cpu):
         l = self.clearinfo(cpu)
@@ -52,13 +61,32 @@ class cpuinfo():
         l = cpu.split(':')[-1].strip().replace(" ","").split(",")
         return l
 
-def readacount ():
-    f = open("e:\\account.txt")
-    l = [ x for x in f.read().split('\n') if not x == ""]
-    accountlist = []
-    for info in l:
-        accountlist.append(account(info))
-    return accountlist
+#读取MEMORY信息
+class memory():
+    def __init__(self,hostname,mem):
+        l = self.clearinfo(mem)
+        self.hostname = "xym%s" %(hostname[-1])
+        print l 
+        for i in l :
+            if i.endswith("total"):
+                self.total = i.split("k")[0]
+                print self.total
+            elif i.endswith("used"):
+                print "this is i :%s" %(i)
+                self.used = i.split("k")[0]
+            elif i.endswith("free"):
+                print "this is i :%s" %(i)
+                self.free = i.split("k")[0]
+            elif i.endswith("buffers"):
+                print "this is i :%s" %(i)
+                self.buffers = i.split("k")[0]
+                
+    def clearinfo(self,mem):
+        #Mem:    873536k total,   769536k used,   104000k free,   135880k buffers  
+        #提取冒号后面的然后空格换成无,用逗号分隔
+        l= mem.split(":")[1].strip().replace(" ","")
+        return l.split(",")
+        
 class sshObj(threading.Thread):
    
     def __init__(self,cmd,connlist):
@@ -70,11 +98,14 @@ class sshObj(threading.Thread):
     def cleardata(self):
         l = self.info.split("\n")
         cpu = ""
+        mem = ""
         for a in l:
             if a.startswith("Cpu"):
                 print a
                 cpu = cpuinfo(self.cmd.hostname,a)
-        return cpu     
+            if a.startswith("Mem"):
+                mem = memory(self.cmd.hostname,a)
+        return cpu,mem
     #进行连接并得到值对象
     def run(self):
         print "this is %s" %(self.cmd.hostname)
@@ -86,10 +117,14 @@ class sshObj(threading.Thread):
         while True:
             #接受命令
             self.info = cannel.recv(9999).replace("[m", "").replace("[H", "").replace("[4;1H", "").replace("[K", "").replace("[7m", "")
-            c = self.cleardata()
+            print self.info
+            c,m = self.cleardata()
             if not isinstance(c, str):
                 for conn in self.connlist:
-                    self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s"%(c.hostname,c.us,c.sy,c.id,c.wa)))
+                    self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s:%s"%('cpu',c.hostname,c.us,c.sy,c.id,c.wa)))
+            if not isinstance(m, str):
+                for conn in self.connlist:
+                    self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s:%s"%('mem',m.hostname,m.total,m.used,m.free,m.buffers)))
         ssh.close()    
 
 # paramiko.util.log_to_file("paramiko.log")
