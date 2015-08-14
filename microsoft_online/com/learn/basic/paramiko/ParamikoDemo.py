@@ -15,4 +15,9 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) #允许链接不在hos
 ssh.connect(hostname=hostname, username=username, password=password )
 stdin,stdout,stderr = ssh.exec_command("ps")
 print stdout.read()
+chancel = ssh.invoke_shell()
+chancel.send("top \n")
+while 1:
+    resp = chancel.recv(9999)
+    print resp
 ssh.close()

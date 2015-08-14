@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>2a367455-3ec2-4348-8f23-0504e91d5e12</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>疯玩\cg_ali213_strategy_content.py</StartupFile>
+    <SearchPath>..\..\..\..\..\Program Files (x86)\IronPython 2.7\</SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <InterpreterId>{80659ab7-4d53-4e0c-8588-a766116cbd46}</InterpreterId>
+    <LaunchProvider>IronPython (.NET) launcher</LaunchProvider>
+    <InterpreterVersion>2.7</InterpreterVersion>
+    <OutputPath>.</OutputPath>
+    <Name>IronPythonScripts</Name>
+    <RootNamespace>IronPythonScripts</RootNamespace>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <CommandLineArguments>
+    </CommandLineArguments>
+    <DebugStdLib>False</DebugStdLib>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{80659ab7-4d53-4e0c-8588-a766116cbd46}\2.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="CSHelper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <Name>CSHelper</Name>
+      <AssemblyName>CSHelper.dll</AssemblyName>
+      <HintPath>..\..\..\..\..\Program Files (x86)\IronPython 2.7\Lib\CSHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CsQuery, Version=1.3.3.249, Culture=neutral, PublicKeyToken=null">
+      <Name>CsQuery</Name>
+      <AssemblyName>CsQuery.dll</AssemblyName>
+      <HintPath>..\..\..\..\..\Program Files (x86)\IronPython 2.7\Lib\CsQuery.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.4.6.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a">
+      <Name>HtmlAgilityPack</Name>
+      <AssemblyName>HtmlAgilityPack.dll</AssemblyName>
+      <HintPath>..\..\..\..\..\Program Files (x86)\IronPython 2.7\Lib\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="build.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="build_result.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="build_reuslt_test.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="main_test.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="modules\core\framework.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="modules\core\framework1_0.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="modules\core\meta.py" />
+    <Compile Include="modules\core\PythonDefaultAnalyst.py" />
+    <Compile Include="modules\core\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="modules\exec-method.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="msn_auto\auto_163_content_csquery.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="msn_auto\auto_feelcars_content_csquery.py" />
+    <Compile Include="msn_auto\auto_feelcars_list_csquery.py" />
+    <Compile Include="msn_auto\auto_gasgoo_content_csquery.py" />
+    <Compile Include="msn_auto\auto_xcar_list_csquery.py" />
+    <Compile Include="msn_fashion\fashion_pclady_content.py" />
+    <Compile Include="msn_fashion\fashion_pclady_list_xpath.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="msn_fashion\fashion_ifeng_content.py" />
+    <Compile Include="msn_fashion\fashion_pclady_list_csquery.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="msn_auto\auto_cheshi_content_csqery_xpath.py" />
+    <Compile Include="msn_auto\__init__.py" />
+    <Compile Include="msn_fashion\__init__.py" />
+    <Compile Include="msn_finance\finance_chinanews_content_csquery.py" />
+    <Compile Include="msn_finance\finance_chinanews_list_csquery.py" />
+    <Compile Include="msn_finance\finance_newscn_content_csquery.py" />
+    <Compile Include="msn_finance\finance_newscn_list_csquery.py" />
+    <Compile Include="msn_finance\finance_people_content_csquery.py" />
+    <Compile Include="msn_finance\finance_people_list_csquery.py" />
+    <Compile Include="msn_finance\finance_paperpeople_list_csquery.py" />
+    <Compile Include="msn_finance\finance_paperpeople_content_csquery.py" />
+    <Compile Include="msn_finance\finance_21cbh_list_csquery.py" />
+    <Compile Include="msn_finance\finance_21cbh_content_csquery.py" />
+    <Compile Include="msn_finance\finance_bjnews_content.py" />
+    <Compile Include="msn_finance\finance_bjnews_list.py" />
+    <Compile Include="msn_finance\finance_jinghua_content_csquery.py" />
+    <Compile Include="msn_finance\finance_jinghua_list_csquery.py" />
+    <Compile Include="msn_finance\finance_bjbusiness_content_csquery.py" />
+    <Compile Include="msn_finance\finance_bjbusiness_list_csquery.py" />
+    <Compile Include="msn_finance\finance_dayoo_list_csquery.py" />
+    <Compile Include="msn_finance\finance_dayoo_content_csquery.py" />
+    <Compile Include="msn_finance\finance_xkb_content_csquery.py" />
+    <Compile Include="msn_finance\finance_xkb_list_csquery.py" />
+    <Compile Include="msn_finance\__init__.py" />
+    <Compile Include="template.content.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="template.list.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="__init__.py" />
+    <Compile Include="疯玩\cg_ali213_reyou_content.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_reyouwp_list.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_news_content.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_news_list.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_pingce_content.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_pingce_list.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_strategy_content.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_strategy_list.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_xinyou_content.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="疯玩\cg_ali213_xinyou_list.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="modules\" />
+    <Folder Include="modules\core\" />
+    <Folder Include="msn_auto\" />
+    <Folder Include="msn_finance\" />
+    <Folder Include="msn_fashion\" />
+    <Folder Include="疯玩\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+</Project>
