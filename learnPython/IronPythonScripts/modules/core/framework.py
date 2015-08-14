@@ -1,19 +1,22 @@
 ﻿#coding=utf-8
-import clr
-clr.AddReferenceToFile("CsQuery.dll")
-clr.AddReferenceToFile("CSHelper.dll","HtmlAgilityPack.dll","Newtonsoft.Json.dll")
 from CSHelper import *
-from HtmlAgilityPack import *
-import Newtonsoft
 import CsQuery
-import meta
-import urllib2
+from HtmlAgilityPack import *
+import clr
+import gzip, cStringIO, traceback
 import re
 import string 
-import gzip, cStringIO,traceback
 import sys
+import time, copy
 import unittest
-import time,copy
+import urllib2
+
+import Newtonsoft
+import meta
+
+
+clr.AddReferenceToFile("CsQuery.dll")
+clr.AddReferenceToFile("CSHelper.dll","HtmlAgilityPack.dll","Newtonsoft.Json.dll")
 Debug=False
 
 
@@ -203,9 +206,11 @@ class PythonContentAnalyst(object):
             name=dic["key"]
             path=dic["path"]                     
             value=""
+            print "name:%s path:%s"
             if name=="content":
                 pages=dic["pages"]
                 cfgtype=dic["type"]
+                print "page:%s type:%s" % (pages,cfgtype)
                 if cfgtype=="text":
                     self.__xpathContent(xpathNode,name,pages,path)
                 elif cfgtype=="index":
@@ -427,6 +432,7 @@ class PythonContentAnalyst(object):
                 self.__getCharset()
 
             echo(self.__charset)
+            #对抓来的网页进行解码
             html=self.__responseText.decode(self.__charset,"ignore")
             self.result.body=""
             
@@ -438,6 +444,7 @@ class PythonContentAnalyst(object):
                 for (k,v) in config:
                     print k,v
                 self.__xpathParser(docNode,config["data"])
+                #开始解析
             elif selector=="csquery":
                 csdom=CsQuery.CQ.Create(html)
                 #echo(csdom.Html())               
@@ -467,11 +474,12 @@ class PythonContentAnalyst(object):
             dic=data[i]
             name=dic["key"]
             paths=dic["path"]            
-            print name, paths
+            print "name:%s paths%s" % (name, paths)
             value=""
             if name=="content":
                 pages=dic["pages"]
                 cfgtype=dic["type"]
+                print pages,cfgtype
                 if cfgtype=="text":
                     self.__csqueryContent(csdom,name,pages,paths)#
                 elif cfgtype=="index":
@@ -498,6 +506,10 @@ class PythonContentAnalyst(object):
                         break 
 
     def __csqueryList(self,csdom,name,pages,paths):
+        #paths['div.liebyj_lei11 div.liebyj_lei3 a']
+        #name content
+        #pages 翻页所在的DIV
+        #csdom转化成csdom   暂时不知道是是什么
         contents=[]
         for index,item in enumerate(paths):
             if type(item)==tuple:

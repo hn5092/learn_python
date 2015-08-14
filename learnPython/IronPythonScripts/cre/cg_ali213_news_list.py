@@ -19,7 +19,9 @@ class cg_ali213_news_list(PythonContentAnalyst):
         self.config.cfgSource=[]
         self.config.cfgIssuedate=[]
         self.config.cfgContent.Type=self.enum.ContentType.index
+        #分页所在的位置
         self.config.cfgContent.Pages=["div.liebyj_libiao3"]
+        #内容所在的位置
         self.config.cfgContent.Path=["div.liebyj_lei11 div.liebyj_lei3 a"]        
         self.config.cfgContent.Options.Excludes=[]       
         self.config.cfgContent.Options.Lamda=lambda *csblock:csblock[0].Attr("href")
@@ -56,7 +58,8 @@ class TC0(unittest.TestCase):
     def testConfig(self):
         self.contentAnalyst.execute("http://www.ali213.net/news/listhtml/list_1_1.html")
         content=self.contentAnalyst.result.content
-        print content,len(content.split("|"))
+        print "this is content : %s" % content
+#         print content,len(content.split("|"))
         self.assertGreater(len(content.split("|")),30)
         pass
     

@@ -4,13 +4,18 @@ Created on Aug 14, 2015
 
 @author: imad
 '''
+import CsQuery
 import sys
 import urllib2
 
 
 req=urllib2.Request("http://www.ali213.net/news/listhtml/list_1_1.html",headers={'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'})
 response=urllib2.urlopen(req,timeout=20) 
-print response.getcode()
-print response.read().decode("utf-8")
-
-print response.info()
+# print response.getcode()
+# print response.read().decode("utf-8")
+# 
+# print response.info()
+#通过创建CQ 来创建一个  网页dom
+dom = CsQuery.CQ.Create(response.read().decode("utf-8"))
+html = dom.Render()
+print html
