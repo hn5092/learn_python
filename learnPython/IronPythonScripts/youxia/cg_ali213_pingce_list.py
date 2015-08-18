@@ -1,9 +1,13 @@
-﻿import unittest
-import sys
-sys.path.append("modules")
-from core.framework import *
-import cg_ali213_news_list
+﻿import sys
+import unittest
+import urllib2
 
+from IronPythonScripts.build_result import echo, FunctionHelper
+from IronPythonScripts.modules.core.framework import PythonContentAnalyst
+from core.framework import *
+
+
+sys.path.append("modules")
 
 #list=cg_ali213_news_list
 #Ali213NewsList=list.cg_ali213_news_list
@@ -24,7 +28,8 @@ class cg_ali213_pingce_list(PythonContentAnalyst):
         self.config.cfgContent.Type=self.enum.ContentType.index
         self.config.cfgContent.Pages=["div.liebyj_libiao3"]
         self.config.cfgContent.Path=["item url","h2 a"]        
-        self.config.cfgContent.Options.Excludes=[]       
+        self.config.cfgContent.Options.Excludes=[]
+        
         self.config.cfgContent.Options.Lamda=lambda *csblock:self.lamda(csblock)
         self.config.cfgContent.Options.PageLamda=lambda *x:x[1]
         self.config.cfgContent.Options.PageNum=2

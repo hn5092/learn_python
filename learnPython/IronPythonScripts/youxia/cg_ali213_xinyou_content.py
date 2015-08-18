@@ -1,7 +1,12 @@
 ﻿import sys
-sys.path.append("modules")
+import unittest
+
+from IronPythonScripts.build_result import echo, FunctionHelper
+from IronPythonScripts.modules.core.framework import PythonContentAnalyst
 from core.framework import *
 
+
+sys.path.append("modules")
 class ali213XinyouContentAnalyst(PythonContentAnalyst):
 
     def setConfig(self,url):

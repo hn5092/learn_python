@@ -1,8 +1,8 @@
 ﻿import sys
 import unittest
 
-from IronPythonScripts.modules.core.framework import PythonContentAnalyst, echo
-from IronPythonScripts.modules.core.meta import FunctionHelper
+from IronPythonScripts.build_result import echo, FunctionHelper
+from IronPythonScripts.modules.core.framework import PythonContentAnalyst
 
 
 sys.path.append("modules")

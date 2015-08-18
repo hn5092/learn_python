@@ -2,8 +2,8 @@
 import sys
 import unittest
 
-from IronPythonScripts.modules.core.framework import PythonContentAnalyst, echo, \
-    FunctionHelper
+from IronPythonScripts.build_result import echo, FunctionHelper
+from IronPythonScripts.modules.core.framework import PythonContentAnalyst
 
 
 sys.path.append("modules")
@@ -125,11 +125,11 @@ class auto163ContentAnalystTC(unittest.TestCase):
 
         result=getresult("http://www.ali213.net/news/html/2015-6/160503.html")
         result=FunctionHelper.string2object(result)
-        self.assertGreater(result.article_properties["title"].find("河南大学生拍"),-1)       
-        self.assertGreater(result.article_properties["summary"].find("的一群毕业生玩起"),-1)
+        print self.assertGreater(result.article_properties["title"].find("河南大学生拍"),-1)       
+        print self.assertGreater(result.article_properties["summary"].find("的一群毕业生玩起"),-1)
         #self.assertGreater(result.article_properties["source"].find("互联网"),-1)         
-        self.assertEqual(result.article_properties["issuedate"],"2015-06-07 17:22:49")
-        self.assertGreater(result.content.find("http://img2.ali213.net/picfile/News/2015/06/07/584_2015060752059634.jpg"),-1)       
+        print self.assertEqual(result.article_properties["issuedate"],"2015-06-07 17:22:49")
+        print self.assertGreater(result.content.find("http://img2.ali213.net/picfile/News/2015/06/07/584_2015060752059634.jpg"),-1)       
         pass
         
 
