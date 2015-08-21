@@ -1,7 +1,7 @@
 ﻿import copy
 import sys
 import unittest, urllib2, json, re
-import framework1_0
+from IronPythonScripts.modules.core import framework1_0
 #<head>#
 GrabberRequestInfo=framework1_0.GrabberRequestInfo
 #<body>#

@@ -1,9 +1,9 @@
 ﻿import sys
 import unittest
 
-from IronPythonScripts.build_result import echo, FunctionHelper
+from IronPythonScripts.modules.core.framework import echo, FunctionHelper
 from IronPythonScripts.modules.core.framework import PythonContentAnalyst
-from core.framework import *
+import Newtonsoft.Json
 
 
 sys.path.append("modules")

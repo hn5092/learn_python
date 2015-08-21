@@ -1,19 +1,22 @@
 #coding=utf-8
-import clr
-clr.AddReferenceToFile("CsQuery.dll")
-clr.AddReferenceToFile("CSHelper.dll","HtmlAgilityPack.dll","Newtonsoft.Json.dll")
 from CSHelper import *
-from HtmlAgilityPack import *
-import Newtonsoft
 import CsQuery
+from HtmlAgilityPack import *
+import Newtonsoft.Json
+import clr
 import copy
-import urllib2
+import gzip, cStringIO, traceback
+import json
 import re
 import string 
-import gzip, cStringIO,traceback
 import sys
+import time, copy
 import unittest
-import time,copy
+import urllib2
+
+
+clr.AddReferenceToFile("CsQuery.dll")
+clr.AddReferenceToFile("CSHelper.dll","HtmlAgilityPack.dll","Newtonsoft.Json.dll")
 Debug=False
 
 
@@ -596,6 +599,7 @@ class HttpRequest2(object):
                 response=urllib2.urlopen(req,timeout=20)                
                 self.responseText=response.read()
                 print response.read() 
+                #查询返回的状态吗
                 self.status=str(response.getcode())
                 headerinfo=response.info()
                 header={}
@@ -719,9 +723,11 @@ class PythonContentAnalyst(object):
             name=dic["key"]
             path=dic["path"]                     
             value=""
+            print "name:%s path:%s"
             if name=="content":
                 pages=dic["pages"]
                 cfgtype=dic["type"]
+                print "page:%s type:%s" % (pages,cfgtype)
                 if cfgtype=="text":
                     self.__xpathContent(xpathNode,name,pages,path)
                 elif cfgtype=="index":
@@ -747,158 +753,159 @@ class PythonContentAnalyst(object):
                         print self.result.article_properties[name]
                         break        
     #解析list页面   
-    def __xpathList(self,xpathNode,name,pages,paths):
-        contents=[]
-        for index,item in enumerate(paths):
-            if type(item)==tuple:#item=(xpath,selector)                    
-                path=item[0]
-                selector=item[1]           
-                text=CSXPathDocument.SelectSingleHtml(xpathNode,path)                    
-                if text:
-                    node=(path,text,selector)
-                    contents.append(node)
-            else:
-                #config.cfgContent.Path=[("//div[@class='layAB picList']/ul",".eTit>a")]
-                raise NameError,("config.cfgContent.Path=(xpath,selector),but the input is "+item)
-
-
-        #page info
-        pagination=self.xpathPagination(xpathNode,pages)        
-        if self.config.cfgContent.Options.PageNum==0:            
-            pagination=list(pagination)[0:]            
-        elif self.config.cfgContent.Options.PageNum>0:
-            pagination=list(pagination)[0:self.config.cfgContent.Options.PageNum-1]
-        else:
-            raise NameError,("self.config.cfgContent.Options.PageNum="+str(cfgContent.Options.PageNum)+", PageNum in [0-n]")
-
-        #page content
-        page_contents=[]
-        for index,item in enumerate(pagination):
-            req=HttpRequest2()
-            req.get(item)
-            h2=req.responseText.decode(self.__charset)
-            docNode2=CSXPathDocument.ConvertStringToHdoc(h2)
-            for idx,content in enumerate(contents):
-                path=content[0]
-                selector=content[2]
-                content=CSXPathDocument.SelectSingleHtml(docNode2, path)
-                if content:
-                    node=(path,content,selector)
-                    page_contents.append(node)
-
-        contents.extend(page_contents)
-
-        csdompages=[]
-        results=[]
-        for index,content in enumerate(contents):            
-            pageHtml="<html><body>"+content[1]+"</body></html>";  
-            selector=content[2]    
-            csdompage= CsQuery.CQ.Create(pageHtml)
-            if type(self.config.cfgContent.Options.Excludes)==list and len(self.config.cfgContent.Options.Excludes)>0:
-                RemoveDom(csdompage,self.config.cfgContent.Options.Excludes)
-            cshypers=csdompage.Select(selector)
-            lamda=self.config.cfgContent.Options.Lamda
-            if lamda:                
-                for idx,item in enumerate(cshypers):
-                    csdoma=CsQuery.CQ.Create(item)                    
-                    text=csdoma.Text()
-                    result=lamda(csdoma,text)
-                    if result:
-                        results.append(result)
-            else:
-                csdompages.append(csdompage)
-
-        if len(results)==0:
-            results=self.xpathConents(csdompages)
-
-        results=list(set(results))
-        text="|".join(results)
-
-        #print text
-        self.result.content=text            
-                    
-    #
-    def __xpathContent(self,xpathNode,name,pages,path):
-        contents=[]
-        for index,item in  enumerate(path):
-            content=CSXPathDocument.SelectSingleHtml(xpathNode,item)
-            currentPath=item
-            if content:                
-                contents.append(content) #
-                break
-
-        pagination=self.xpathPagination(xpathNode,pages)
-        for index,item in enumerate(pagination):
-            req=HttpRequest2()
-            req.get(item)
-            h2=req.responseText.decode(self.__charset)
-            docNode2=CSXPathDocument.ConvertStringToHdoc(h2)
-            cont=CSXPathDocument.SelectSingleHtml(docNode2, currentPath)
-            contents.append(cont)
-        
-        paginations=[]
-        for index,item in enumerate(contents):
-            text=item #self.clearText(item)
-            pageHtml="<html><body>"+text+"</body></html>";           
-            csdompagination= CsQuery.CQ.Create(pageHtml)            
-            paginations.append(csdompagination)
-
-        lamda=self.config.cfgContent.Options.Lamda
-        if lamda:
-            lamda(paginations)
-        else:
-            cspages=self.xpathConents(paginations)
-        results=[]
-        for idx,cspage in enumerate(cspages):
-            RemoveDom(cspage,["style","iframe","script","object","class","head"])
-            if type(self.config.cfgContent.Options.Excludes)==list and len(self.config.cfgContent.Options.Excludes)>0:
-                RemoveDom(cspage,self.config.cfgContent.Options.Excludes)   
-            self.pageCsContentImage(cspage)              
-            content=cspage.Select("body").Html()   
-            #content=RemoveText(content,['<!--[^>]*?>','(?<=style=["\'])[^"\']+','(?<=onmouseover=["\'])[^"\']+'])
-            #content=self.defaultReplace(content)
-            content=self.pageContentText(content)
-            #content=StringHelper.EscapeUnicode(content)            
-            results.append(content)
-        text="@@abcMSNPageMarkerabc@@".join(results) 
-        #print text
-        self.result.content=text
+#     def __xpathList(self,xpathNode,name,pages,paths):
+#         contents=[]
+#         for index,item in enumerate(paths):
+#             if type(item)==tuple:#item=(xpath,selector)                    
+#                 path=item[0]
+#                 selector=item[1]           
+#                 text=CSXPathDocument.SelectSingleHtml(xpathNode,path)                    
+#                 if text:
+#                     node=(path,text,selector)
+#                     contents.append(node)
+#             else:
+#                 #config.cfgContent.Path=[("//div[@class='layAB picList']/ul",".eTit>a")]
+#                 raise NameError,("config.cfgContent.Path=(xpath,selector),but the input is "+item)
+# 
+# 
+#         #page info
+#         pagination=self.xpathPagination(xpathNode,pages)        
+#         if self.config.cfgContent.Options.PageNum==0:            
+#             pagination=list(pagination)[0:]            
+#         elif self.config.cfgContent.Options.PageNum>0:
+#             pagination=list(pagination)[0:self.config.cfgContent.Options.PageNum-1]
+#         else:
+#             raise NameError,("self.config.cfgContent.Options.PageNum="+str(self.config.cfgContent.Options.PageNum)+", PageNum in [0-n]")
+# 
+#         #page content
+#         page_contents=[]
+#         for index,item in enumerate(pagination):
+#             req=HttpRequest2()
+#             req.get(item)
+#             h2=req.responseText.decode(self.__charset)
+#             docNode2=CSXPathDocument.ConvertStringToHdoc(h2)
+#             for idx,content in enumerate(contents):
+#                 path=content[0]
+#                 selector=content[2]
+#                 content=CSXPathDocument.SelectSingleHtml(docNode2, path)
+#                 if content:
+#                     node=(path,content,selector)
+#                     page_contents.append(node)
+# 
+#         contents.extend(page_contents)
+# 
+#         csdompages=[]
+#         results=[]
+#         for index,content in enumerate(contents):            
+#             pageHtml="<html><body>"+content[1]+"</body></html>";  
+#             selector=content[2]    
+#             csdompage= CsQuery.CQ.Create(pageHtml)
+#             if type(self.config.cfgContent.Options.Excludes)==list and len(self.config.cfgContent.Options.Excludes)>0:
+#                 RemoveDom(csdompage,self.config.cfgContent.Options.Excludes)
+#             cshypers=csdompage.Select(selector)
+#             lamda=self.config.cfgContent.Options.Lamda
+#             if lamda:                
+#                 for idx,item in enumerate(cshypers):
+#                     csdoma=CsQuery.CQ.Create(item)                    
+#                     text=csdoma.Text()
+#                     result=lamda(csdoma,text)
+#                     if result:
+#                         results.append(result)
+#             else:
+#                 csdompages.append(csdompage)
+# 
+#         if len(results)==0:
+#             results=self.xpathConents(csdompages)
+# 
+#         results=list(set(results))
+#         text="|".join(results)
+# 
+#         #print text
+#         self.result.content=text            
+#                     
+#     #
+#     def __xpathContent(self,xpathNode,name,pages,path):
+#         contents=[]
+#         #循环路径获取指定节点
+#         for index,item in  enumerate(path):
+#             content=CSXPathDocument.SelectSingleHtml(xpathNode,item)
+#             currentPath=item
+#             if content:                
+#                 contents.append(content) #
+#                 break
+# 
+#         pagination=self.xpathPagination(xpathNode,pages)
+#         for index,item in enumerate(pagination):
+#             req=HttpRequest2()
+#             req.get(item)
+#             h2=req.responseText.decode(self.__charset)
+#             docNode2=CSXPathDocument.ConvertStringToHdoc(h2)
+#             cont=CSXPathDocument.SelectSingleHtml(docNode2, currentPath)
+#             contents.append(cont)
+#         
+#         paginations=[]
+#         for index,item in enumerate(contents):
+#             text=item #self.clearText(item)
+#             pageHtml="<html><body>"+text+"</body></html>";           
+#             csdompagination= CsQuery.CQ.Create(pageHtml)            
+#             paginations.append(csdompagination)
+# 
+#         lamda=self.config.cfgContent.Options.Lamda
+#         if lamda:
+#             lamda(paginations)
+#         else:
+#             cspages=self.xpathConents(paginations)
+#         results=[]
+#         for idx,cspage in enumerate(cspages):
+#             RemoveDom(cspage,["style","iframe","script","object","class","head"])
+#             if type(self.config.cfgContent.Options.Excludes)==list and len(self.config.cfgContent.Options.Excludes)>0:
+#                 RemoveDom(cspage,self.config.cfgContent.Options.Excludes)   
+#             self.pageCsContentImage(cspage)              
+#             content=cspage.Select("body").Html()   
+#             #content=RemoveText(content,['<!--[^>]*?>','(?<=style=["\'])[^"\']+','(?<=onmouseover=["\'])[^"\']+'])
+#             #content=self.defaultReplace(content)
+#             content=self.pageContentText(content)
+#             #content=StringHelper.EscapeUnicode(content)            
+#             results.append(content)
+#         text="@@abcMSNPageMarkerabc@@".join(results)
+#         #print text
+#         self.result.content=text
 
     #分页链接获取
-    def xpathPagination(self,xpathNode,pagesPath):
-        pages=[]
-        for index,item in enumerate(pagesPath):
-            xpath=item
-            content=CSXPathDocument.SelectSingleHtml(xpathNode,xpath)
-            if content:
-                html="<html><body>"+content+"</body></html>"
-                children=CsQuery.CQ.Create(html).Select("body").Find("a")                
-                if children.Length>0:
-                    for i in range(0,children.Length):
-                        csdoma=CsQuery.CQ.Create(children[i])  
-                        href=csdoma.Attr("href")   
-                        text=csdoma.Text()
-                        if self.config.cfgContent.Options.PageLamda :
-                            str=self.config.cfgContent.Options.PageLamda(csdoma,href,text)
-                            if not str:
-                                continue
-                            else:
-                                href=str
-                        
-                        if href and href[0:1]=="/":
-                            proto, rest = urllib2.splittype(url)  
-                            host, rest = urllib2.splithost(rest)
-                            href=proto+"://"+host+href
-                                             
-                        scale=self.config.cfgContent.Options.PageSimilarity
-                        rate=0.0
-                        simlilar=StringHelper.LevenshteinDistance(self.__url,href,rate)
-                        if href and simlilar[1]>scale and simlilar[1]<1:
-                            pages.append(href)                    
-                if pages.Count>0:
-                    func = lambda x,y:x if y in x else x + [y]
-                    pages=reduce(func, [[], ] + pages)                                  
-        return pages
+#     def xpathPagination(self,xpathNode,pagesPath):
+#         pages=[]
+#         for index,item in enumerate(pagesPath):
+#             xpath=item
+#             content=CSXPathDocument.SelectSingleHtml(xpathNode,xpath)
+#             if content:
+#                 html="<html><body>"+content+"</body></html>"
+#                 children=CsQuery.CQ.Create(html).Select("body").Find("a")                
+#                 if children.Length>0:
+#                     for i in range(0,children.Length):
+#                         csdoma=CsQuery.CQ.Create(children[i])  
+#                         href=csdoma.Attr("href")   
+#                         text=csdoma.Text()
+#                         if self.config.cfgContent.Options.PageLamda :
+#                             str=self.config.cfgContent.Options.PageLamda(csdoma,href,text)
+#                             if not str:
+#                                 continue
+#                             else:
+#                                 href=str
+#                         
+#                         if href and href[0:1]=="/":
+#                             proto, rest = urllib2.splittype(url)  
+#                             host, rest = urllib2.splithost(rest)
+#                             href=proto+"://"+host+href
+#                                              
+#                         scale=self.config.cfgContent.Options.PageSimilarity
+#                         rate=0.0
+#                         simlilar=StringHelper.LevenshteinDistance(self.__url,href,rate)
+#                         if href and simlilar[1]>scale and simlilar[1]<1:
+#                             pages.append(href)                    
+#                 if pages.Count>0:
+#                     func = lambda x,y:x if y in x else x + [y]
+#                     pages=reduce(func, [[], ] + pages)                                  
+#         return pages
            
     #客户端方法
     def xpathConents(self,csdompagination):
@@ -917,7 +924,7 @@ class PythonContentAnalyst(object):
     
     def execute(self,url):
         html=""
-        
+        print "im come"
         try:        
             self.setConfig(url)
             config=self.config.Resolve()
@@ -926,6 +933,7 @@ class PythonContentAnalyst(object):
                 raise ValueError,("config.cfgUrl is empty.")
                 
             self.__url=self.config.cfgUrl
+            #得到网页的内容对象
             request=HttpRequest2()
             request.get(self.__url)
             
@@ -937,21 +945,27 @@ class PythonContentAnalyst(object):
             self.result.errormassage=self.result.erronmassage
             self.result.status=request.status
             self.result.header['IfModifiedSince']=request.lastModified
-
+            
             self.__charset=config["charset"]
             if not self.__charset:
                 self.__getCharset()
 
             echo(self.__charset)
+            #对抓来的网页进行解码
             html=self.__responseText.decode(self.__charset,"ignore")
             self.result.body=""
             
 
             selector=config["selector"]
             print "selector:%s" % (selector)
+            #现在不用Xpath 
             if selector=="xpath":
-                docNode=CSXPathDocument.ConvertStringToHdoc(html)
-                self.__xpathParser(docNode,config["data"])
+                pass
+#                 docNode=CSXPathDocument.ConvertStringToHdoc(html)
+#                 for (k,v) in config:
+#                     print k,v
+#                 self.__xpathParser(docNode,config["data"])
+                #开始解析
             elif selector=="csquery":
                 csdom=CsQuery.CQ.Create(html)
                 #echo(csdom.Html())               
@@ -975,16 +989,18 @@ class PythonContentAnalyst(object):
             self.__contentType=""
             self.__lastModified=""
             self.__responseText=""            
-
+    #传入的网页dom  还有config[data]
     def __csqueryParser(self,csdom,data):
         for i in range(len(data)):
             dic=data[i]
             name=dic["key"]
             paths=dic["path"]            
+            print "name:%s paths:%s" % (name, paths)
             value=""
             if name=="content":
                 pages=dic["pages"]
                 cfgtype=dic["type"]
+                print pages,cfgtype
                 if cfgtype=="text":
                     self.__csqueryContent(csdom,name,pages,paths)#
                 elif cfgtype=="index":
@@ -1001,7 +1017,7 @@ class PythonContentAnalyst(object):
                             lamda=item[1]
 
                     echo("path="+pth)
-                    dom=csdom.Select(pth);
+                    dom=csdom.Select(pth)
                     if dom.Length>0:
                         value=dom.Text()                         
                         if lamda:value=lamda(value)
@@ -1011,10 +1027,13 @@ class PythonContentAnalyst(object):
                         break 
 
     def __csqueryList(self,csdom,name,pages,paths):
+        #paths['div.liebyj_lei11 div.liebyj_lei3 a']
+        #name content
+        #pages 翻页所在的DIV
+        #csdom转化成csdom 
         contents=[]
-        for index,item in enumerate(paths):
+        for item in paths:
             if type(item)==tuple:
-                nodeText=[]               
                 for i in range(0,len(item)):
                     path=item[i]
                     dom=csdom.Select(path)                    
@@ -1030,15 +1049,15 @@ class PythonContentAnalyst(object):
                 if dom.Length>0:
                     contents.append(dom)                     
                     break
-        #page info
+        #page info 获取下一页
         pagination=self.csqueryPagination(csdom,pages)
         if self.config.cfgContent.Options.PageNum==0:
             pagination=list(pagination)[0:]            
         elif self.config.cfgContent.Options.PageNum>0:
             pagination=list(pagination)[0:self.config.cfgContent.Options.PageNum-1]
         else:
-            raise NameError,("self.config.cfgContent.Options.PageNum="+str(cfgContent.Options.PageNum)+", PageNum in [0-n]")
-    
+            raise NameError,("self.config.cfgContent.Options.PageNum="+str(self.config.cfgContent.Options.PageNum)+", PageNum in [0-n]")
+        #跟第一页一样循环遍地
         for index,item in enumerate(pagination):
             echo("request:"+item)
             req=HttpRequest2()
@@ -1061,7 +1080,7 @@ class PythonContentAnalyst(object):
             
             lamda=self.config.cfgContent.Options.Lamda
             if lamda:
-                for idx,item in enumerate(cshyperblocks):
+                for item in cshyperblocks:
                     csblock=CsQuery.CQ.Create(item)
                     text=csblock.Text()
                     result=lamda(csblock,text)                    
@@ -1073,7 +1092,7 @@ class PythonContentAnalyst(object):
                             results.append(v)
             else:
                 csdompages.append(cshyperblocks)        
-
+        #如果没有就返回content
         if len(results)==0:
             results=self.csqueryConents(contents)
         
@@ -1085,6 +1104,7 @@ class PythonContentAnalyst(object):
 
     def __csqueryContent(self,csdom,name,pages,paths):
         contents=[]
+        #循环遍历添加节点
         for index,item in  enumerate(paths):
             dom=csdom.Select(item)                        
             currentPath=item
@@ -1092,7 +1112,7 @@ class PythonContentAnalyst(object):
             if dom.Length>0:     
                 contents.append(dom) 
                 break
-
+        #获取分页的内容
         pagination=self.csqueryPagination(csdom,pages)
         for index,item in enumerate(pagination):
             req=HttpRequest2()
@@ -1101,12 +1121,13 @@ class PythonContentAnalyst(object):
             csHtmldom=CsQuery.CQ.Create(h2)
             domPage=csHtmldom.Select(currentPath)            
             contents.append(domPage)
-
-        for index,cspage in enumerate(contents):
+        #去除dom
+        for cspage in contents:
+                  
             RemoveDom(cspage,["style","iframe","script","object","head"])
             if type(self.config.cfgContent.Options.Excludes)==list and len(self.config.cfgContent.Options.Excludes)>0:
-                RemoveDom(cspage,self.config.cfgContent.Options.Excludes)                 
-        
+                RemoveDom(cspage,self.config.cfgContent.Options.Excludes)
+                
         cspages=self.csqueryConents(contents)
         if len(cspages)>0:
             self.lastCsdomp(cspages[len(cspages)-1])
@@ -1124,7 +1145,9 @@ class PythonContentAnalyst(object):
             content=self.pageContentText(content)                        
             results.append(content)
         text="@@abcMSNPageMarkerabc@@".join(results) 
+        print "-----------------------------------------------------------------------------"
         echo(text)
+        print "-----------------------------------------------------------------------------"
         self.result.content=text
           
     def lastCsdomp(self,lastcsdompage):
@@ -1171,7 +1194,8 @@ class PythonContentAnalyst(object):
         try:
             content=RemoveText(content,['<!--[^>]*?-->','(?<=style=["\'])[^"\']+','(?<=onmouseover=["\'])[^"\']+'])
             content=self.defaultReplace(content)
-            content=StringHelper.EscapeUnicode(content)     
+            content=StringHelper.EscapeUnicode(content)   
+            print "--------------------------------------------------------------------------------------"  
             echo(content)
         except Exception as err:
             pass
@@ -1200,6 +1224,7 @@ class PythonContentAnalyst(object):
             csquery=item
             cspage=csdom.Select(csquery)           
             if cspage:                
+                #找到所有的a标签 
                 children=cspage.Find("a")                
                 if children.Length>0:
                     for i in range(0,children.Length):
@@ -1209,9 +1234,13 @@ class PythonContentAnalyst(object):
                         pagelamda=self.config.cfgContent.Options.PageLamda
                         if pagelamda:
                             str=pagelamda(cshyper,href,text)
+                            print "this is type for url : %s" % (type(str))
+                            
                             if str:
                                 href=str
+                                print " this is true"
                             else:
+                                print "this is false"
                                 continue
 
                         if href and href[0:1]=="/":
@@ -1234,12 +1263,14 @@ class PythonContentAnalyst(object):
                         scale=self.config.cfgContent.Options.PageSimilarity          
                         rate=0.0
                         simlilar=StringHelper.LevenshteinDistance(self.__url,href,rate)
+                        print "this is simliar :%f " % simlilar[1]
                         if href and simlilar[1]>scale and simlilar[1]<1:
                             pages.append(href) 
                                             
                 if pages.Count>0:                    
                     func = lambda x,y:x if y in x else x + [y]
-                    pages=reduce(func, [[], ] + pages)                                 
+                    pages=reduce(func, [[], ] + pages)  
+                print "this is pages length %s " %(pages.__len__())                               
         return pages
 
 

@@ -5,10 +5,6 @@ import urllib2
 clr.AddReferenceToFile('CsQuery.dll','Newtonsoft.Json.dll')
 import Newtonsoft
 
-
-
-
-
 #<body>#
 class PyCQ:
     __cq = CsQuery.CQ()

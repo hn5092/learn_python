@@ -31,7 +31,7 @@ class account():
         self.pwd = info[1]
         self.username = info[2]
 def readacount ():
-    f = open("e:\\account.txt")
+    f = open("e:\\hadoop.txt")
     l = [ x for x in f.read().split('\n') if not x == ""]
     accountlist = []
     for info in l:
@@ -114,17 +114,23 @@ class sshObj(threading.Thread):
         ssh.connect(hostname=self.cmd.hostname, username=self.cmd.username, password=self.cmd.pwd )
         cannel = ssh.invoke_shell()  #获取一个命令调用
         cannel.send("top \n")#发送一个命令
-        while True:
-            #接受命令
-            self.info = cannel.recv(9999).replace("[m", "").replace("[H", "").replace("[4;1H", "").replace("[K", "").replace("[7m", "")
-            print self.info
-            c,m = self.cleardata()
-            if not isinstance(c, str):
-                for conn in self.connlist:
-                    self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s:%s"%('cpu',c.hostname,c.us,c.sy,c.id,c.wa)))
-            if not isinstance(m, str):
-                for conn in self.connlist:
-                    self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s:%s"%('mem',m.hostname,m.total,m.used,m.free,m.buffers)))
+        #防止有时候发送不成功  再次发送指令
+        while "VIRT" not in cannel.recv(9999):
+            cannel.send("top \n")
+        else:    
+            while True:
+                #接受命令
+                self.info = cannel.recv(9999).replace("[m", "").replace("[H", "").replace("[4;1H", "").replace("[K", "").replace("[7m", "")
+                print self.info
+                c,m = self.cleardata()
+                #判断
+                if not isinstance(c, str):
+                    for conn in self.connlist:
+                        self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s:%s"%('cpu',c.hostname,c.us,c.sy,c.id,c.wa)))
+                if not isinstance(m, str):
+                    for conn in self.connlist:
+                        self.connlist[conn].sendall(send_data("%s:%s:%s:%s:%s:%s"%('mem',m.hostname,m.total,m.used,m.free,m.buffers)))
+        
         ssh.close()    
 
 # paramiko.util.log_to_file("paramiko.log")
