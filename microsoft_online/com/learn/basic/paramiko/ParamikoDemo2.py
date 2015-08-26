@@ -31,7 +31,7 @@ class account():
         self.pwd = info[1]
         self.username = info[2]
 def readacount ():
-    f = open("e:\\hadoop.txt")
+    f = open("e:\\account.txt")
     l = [ x for x in f.read().split('\n') if not x == ""]
     accountlist = []
     for info in l:

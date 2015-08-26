@@ -10,6 +10,7 @@ password = "xuyu5092"
 client = paramiko.Transport(("192.168.80.101",22))
 client.connect(username=username,password=password)
 sftp = paramiko.SFTPClient.from_transport(client)
-localhost = "o.log"
-remotepath = "/root/paramiko.log"
+localhost = "o.zip"
+remotepath = "/root/redis.zip"
 sftp.get(remotepath,localhost)
+print "下载成功"

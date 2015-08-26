@@ -4,9 +4,6 @@ Created on Aug 10, 2015
 
 @author: imad
 '''
-import sys
-import inspect
-from ecdsa.ecdsa import __main__
 def foo(name):
     print name+"呵呵"
 
@@ -22,7 +19,12 @@ class Cat(object):
 if __name__ == "__main__":
     cat  = Cat("bule")
     cat.sayHi()
+    print cat.__class__;
     print dir(cat)
+    print hasattr(cat, "name")
+    print cat.name
+    print setattr(cat, "name", "grep")
+    print getattr(cat, "name")
     if hasattr(cat, "name"):
         print "cat hava name attr"
         setattr(cat, "name", "grep")

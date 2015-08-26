@@ -15,5 +15,5 @@ print Cat.__dict__
 
 cat2 = globals()['Cat']("blue")
 cat2.sayHi()
-cat3 = globals()['foo']("blue")
-cat3()
+# cat3 = globals()['foo']("blue")
+# cat3()

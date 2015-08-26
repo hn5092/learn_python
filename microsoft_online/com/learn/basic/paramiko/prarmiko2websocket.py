@@ -87,7 +87,6 @@ class WebSocket(threading.Thread):
                     #允许链接不在host里面的主机
                     print "开始启动"
                     for cmd in readacount():
-                        
                         conn = sshObj(cmd,connlist)
                         conn.start()
                         print "%s已经启动"%(cmd.hostname)
