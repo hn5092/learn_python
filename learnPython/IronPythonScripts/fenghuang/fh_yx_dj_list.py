@@ -4,7 +4,6 @@ import unittest
 
 from IronPythonScripts.modules.core.framework import PythonContentAnalyst, echo
 
-
 sys.path.append("modules")
 
 class cg_ali213_news_list(PythonContentAnalyst):
