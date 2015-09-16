@@ -35,3 +35,12 @@ def people(name='xym'):
 # 
 # eval("people")(1)
 vars()['people'](2)
+
+
+
+@eat
+class a():
+    def b(self):
+        print "b"
+    def c(self):
+        print "c"
