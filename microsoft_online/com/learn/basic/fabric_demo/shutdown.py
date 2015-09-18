@@ -17,6 +17,7 @@ env.passswords = {'root@192.168.80.101:22':'xuyu5092',
                   'root@192.168.80.104:22':'xuyu5092',
                   'root@192.168.80.105:22':'xuyu5092'
                   }
+
 @roles('zookeeper')
 def zookeepertask():
     run('/itcast/zookeeper-3.4.5/bin/zkServer.sh stop')

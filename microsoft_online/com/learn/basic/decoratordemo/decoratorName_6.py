@@ -20,5 +20,10 @@ def timeit(func):
 def foo():
     print 'in foo()'
  
-foo()
-print foo.__name__
+# foo()
+# print foo.__name__
+@timeit
+def foo2():
+    pass
+if foo2.__name__ == "foo2":
+    print "i am foo2"
