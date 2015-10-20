@@ -7,6 +7,7 @@ Created on Aug 26, 2015
 from fabric.colors import *
 from fabric.api import *
 env.user = 'root'
+# env.password = "xuyu5092"
 env.roledefs = {'master':{'192.168.80.101'},
                 'yarn':{'192.168.80.103'},
                 'zookeeper':{'192.168.80.102','192.168.80.104','192.168.80.105'}
@@ -30,9 +31,20 @@ def mastertask():
 
 @roles('yarn')
 def yarntask():
+#    run("hostname")
     run('/itcast/hadoop-2.2.0/sbin/stop-yarn.sh')
-    print green("yarn启动完毕")
-def boot():
+    run('/itcast/hbase-0.96.2-hadoop2/bin/stop-hbase.sh')
+#     print green("yarn")
+@roles("zookeeper","yarn","master")
+def shutdown():
+    run('poweroff')
+    print "shutdown......"
+def stop():
     execute(yarntask)
     execute(mastertask)
     execute(zookeepertask)
+def stopAndShoutDown():
+    execute(yarntask)
+    execute(mastertask)
+    execute(zookeepertask)
+    execute(shutdown)

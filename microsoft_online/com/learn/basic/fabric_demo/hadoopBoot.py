@@ -6,6 +6,7 @@ Created on Aug 26, 2015
 '''
 from fabric.colors import *
 from fabric.api import *
+# env.gateway = "xxx"
 env.user = 'root'
 env.roledefs = {'master':{'192.168.80.101'},
                 'yarn':{'192.168.80.103'},
@@ -19,18 +20,22 @@ env.passswords = {'root@192.168.80.101:22':'xuyu5092',
                   }
 @roles('zookeeper')
 def zookeepertask():
+    run("hostname")
     run('/itcast/zookeeper-3.4.5/bin/zkServer.sh start')
-    print green("zookeeper启动完毕")
+    print green("zookeeper successful")
 
 @roles("master")
 def mastertask():
+    run("hostname")
     run('/itcast/hadoop-2.2.0/sbin/start-dfs.sh')
-    print green("hdfs启动完毕")
+    print green("hdfs successful")
 
 @roles('yarn')
 def yarntask():
+    run("hostname")
     run('/itcast/hadoop-2.2.0/sbin/start-yarn.sh')
-    print green("yarn启动完毕")
+    run("/itcast/hbase-0.96.2-hadoop2/bin/start-hbase.sh")
+    print green("yarn successful")
 def boot():
     execute(zookeepertask)
     execute(mastertask)

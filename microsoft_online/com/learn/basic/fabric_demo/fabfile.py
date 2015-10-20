@@ -17,9 +17,9 @@ from fabric.api import *
 # reboot() 重启远程主机
 # @task 标记一个任务  没有标记的在fab中是不可见的 业务逻辑
 # @runs_onece  此任务只会执行一次 不受多台主机影响
-env.user = 'root'
-env.hosts = ['192.168.80.101','192.168.80.102']
-env.password = 'xuyu5092'
+# env.user = 'root'
+# env.hosts = ['192.168.80.101','192.168.80.102']
+# env.password = 'xuyu5092'
 def remote_task():
     with cd('~'):
-        run("ls -l")
+        run("hostname")
